@@ -62,46 +62,27 @@ I would like to know where it was used.
 Class is available under the open-source GDAL license (www.gdal.org).
 """
 #####the following helper functions were taken from the open source project cited above  
-import math
 
-def LatLonToPixels(lat, lon, zoom):
-	"Converts lat/lon to pixel coordinates in given zoom of the EPSG:4326 pyramid"
+# def Resolution(level):
+#     "Resolution (arc/pixel) for given zoom level (measured at Equator)"
+#
+#     return 180 / 256.0 / 2**level
+#     #return 180 / float( 1 << (8+zoom) )
 
-	res = 180 / 256.0 / 2**zoom
-	px = (180 + lat) / res
-	py = (90 + lon) / res
-	return px, py
-
-def PixelsToTile(px, py):
-	"Returns coordinates of the tile covering region in pixel coordinates"
-
-	tx = int( math.ceil( px / float(self.tileSize) ) - 1 )
-	ty = int( math.ceil( py / float(self.tileSize) ) - 1 )
-	return tx, ty
-
-def Resolution(zoom ):
-	"Resolution (arc/pixel) for given zoom level (measured at Equator)"
-	
-	return 180 / 256.0 / 2**zoom
-	#return 180 / float( 1 << (8+zoom) )
-
-def TileBounds(tx, ty, zoom):
-	"Returns bounds of the given tile"
-	res = 180 / 256.0 / 2**zoom
-	return (
-		tx*256*res - 180,
-		ty*256*res - 90,
-		(tx+1)*256*res - 180,
-		(ty+1)*256*res - 90
-	)
-
+# def TileBounds(tx, ty, level):
+#     "Returns bounds of the given tile"
+#     res = 180 / 256.0 / 2**level
+#     return (
+#         tx*256*res - 180,
+#         ty*256*res - 90,
+#         (tx+1)*256*res - 180,
+#         (ty+1)*256*res - 90
+#     )
 
 def QuadTree(tx, ty, zoom ):
 	"Converts TMS tile coordinates to Microsoft QuadTree"
-	
 	quadKey = ""
-	ty = (2**zoom - 1) - ty
-	for i in range(zoom, 0, -1):
+	for i in range(level, 0, -1):
 		digit = 0
 		mask = 1 << (i-1)
 		if (tx & mask) != 0:
@@ -110,17 +91,57 @@ def QuadTree(tx, ty, zoom ):
 			digit += 2
 		quadKey += str(digit)
 	return quadKey
+    
+################## own code
+import math
+import sys
 
+def LatLonToPixels(lat, lon, level):
+	"Converts lat/lon to pixel coordinates in given zoom of the EPSG:4326 pyramid"
+	sinlatitude = math.sin(lat * math.pi / 180)
+	px = ((180 + lon) / 360) * 256 * 2**level
+	py = (0.5 - math.log(1+sinlatitude)/(1-sinlatitude) / (4*math.pi)) * 256 * 2**level
+	return px, py
 
-##### own code
+def PixelsToTile(px, py):
+	"Returns coordinates of the tile covering region in pixel coordinates"
+
+	tx = int(math.floor(px / 256.0))
+	ty = int(math.floor(py / 256.0))
+	return tx, ty
 
 def centers(lat, lon, lat1, lon1):
 	"Compute the centers"
 	lat = float(lat)
-	lat = float(lon)
-	lat = float(lat1)
-	lat = float(lon1)
+	lon = float(lon)
+	lat1 = float(lat1)
+	lon1 = float(lon1)
 	final_lat = (lat + lat1)/2.0
 	final_lon = (lon + lon1)/2.0
 
 	return final_lat, final_lon
+
+
+    
+# lat = 42.057000
+# lon = -87.674883
+# lat1 = 42.058500
+# lon1 = -87.676883
+# level = 23
+
+lat = 49.45
+lon = 11.08
+level = 3
+test1, test2, = LatLonToPixels(lat, lon, level)
+tile_x, tile_y = PixelsToTile(test1, test2)
+quadkey = QuadTree(tile_x, tile_y, level)
+print quadkey
+sys.exit()
+
+center_lat, center_lon = centers(lat, lon, lat1, lon1)
+pix_x, pix_y = LatLonToPixels(center_lat, center_lon, level)
+print pix_x, pix_y
+tile_x, tile_y = PixelsToTile(pix_x, pix_y)
+top_x, top_y, bottom_x, bottom_y = TileBounds(tile_x, tile_y, level)
+quadkey = QuadTree(tile_x, tile_y, level)
+print quadkey
