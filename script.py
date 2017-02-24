@@ -82,6 +82,7 @@ Class is available under the open-source GDAL license (www.gdal.org).
 def QuadTree(tx, ty, zoom ):
 	"Converts TMS tile coordinates to Microsoft QuadTree"
 	quadKey = ""
+	print tx, ty
 	for i in range(level, 0, -1):
 		digit = 0
 		mask = 1 << (i-1)
@@ -95,6 +96,9 @@ def QuadTree(tx, ty, zoom ):
 ################## own code
 import math
 import sys
+import urllib, cStringIO
+from PIL import Image
+
 
 def LatLonToPixels(lat, lon, level):
 	"Converts lat/lon to pixel coordinates in given zoom of the EPSG:4326 pyramid"
@@ -121,27 +125,28 @@ def centers(lat, lon, lat1, lon1):
 
 	return final_lat, final_lon
 
-
     
 # lat = 42.057000
 # lon = -87.674883
 # lat1 = 42.058500
 # lon1 = -87.676883
-# level = 23
+# level = 18
 
 lat = 49.45
-lon = 11.08
-level = 3
+lon = -11.08
+level = 1
 test1, test2, = LatLonToPixels(lat, lon, level)
 tile_x, tile_y = PixelsToTile(test1, test2)
 quadkey = QuadTree(tile_x, tile_y, level)
 print quadkey
+URL = "http://h0.ortho.tiles.virtualearth.net/tiles/h" + quadkey + ".jpeg?g=131"
+urllib.urlretrieve(URL, "tile.jpg")
+
 sys.exit()
 
-center_lat, center_lon = centers(lat, lon, lat1, lon1)
-pix_x, pix_y = LatLonToPixels(center_lat, center_lon, level)
-print pix_x, pix_y
-tile_x, tile_y = PixelsToTile(pix_x, pix_y)
-top_x, top_y, bottom_x, bottom_y = TileBounds(tile_x, tile_y, level)
-quadkey = QuadTree(tile_x, tile_y, level)
-print quadkey
+# center_lat, center_lon = centers(lat, lon, lat1, lon1)
+# pix_x, pix_y = LatLonToPixels(center_lat, center_lon, level)
+# tile_x, tile_y = PixelsToTile(pix_x, pix_y)
+# #top_x, top_y, bottom_x, bottom_y = TileBounds(tile_x, tile_y, level)
+# quadkey = QuadTree(tile_x, tile_y, level)
+# print quadkey
