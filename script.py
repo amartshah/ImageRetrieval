@@ -30,78 +30,31 @@
 # DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
-"""
-globalmaptiles.py
-
-Global Map Tiles as defined in Tile Map Service (TMS) Profiles
-==============================================================
-
-Functions necessary for generation of global tiles used on the web.
-It contains classes implementing coordinate conversions for:
-
-  - GlobalMercator (based on EPSG:900913 = EPSG:3785)
-       for Google Maps, Yahoo Maps, Microsoft Maps compatible tiles
-  - GlobalGeodetic (based on EPSG:4326)
-       for OpenLayers Base Map and Google Earth compatible tiles
-
-More info at:
-
-http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification
-http://wiki.osgeo.org/wiki/WMS_Tiling_Client_Recommendation
-http://msdn.microsoft.com/en-us/library/bb259689.aspx
-http://code.google.com/apis/maps/documentation/overlays.html#Google_Maps_Coordinates
-
-Created by Klokan Petr Pridal on 2008-07-03.
-Google Summer of Code 2008, project GDAL2Tiles for OSGEO.
-
-In case you use this class in your product, translate it to another language
-or find it usefull for your project please let me know.
-My email: klokan at klokan dot cz.
-I would like to know where it was used.
-
-Class is available under the open-source GDAL license (www.gdal.org).
-"""
-#####the following helper functions were taken from the open source project cited above  
-
-# def Resolution(level):
-#     "Resolution (arc/pixel) for given zoom level (measured at Equator)"
-#
-#     return 180 / 256.0 / 2**level
-#     #return 180 / float( 1 << (8+zoom) )
-
-# def TileBounds(tx, ty, level):
-#     "Returns bounds of the given tile"
-#     res = 180 / 256.0 / 2**level
-#     return (
-#         tx*256*res - 180,
-#         ty*256*res - 90,
-#         (tx+1)*256*res - 180,
-#         (ty+1)*256*res - 90
-#     )
+##the following function was taken from the above open source code
 
 def QuadTree(tx, ty, zoom ):
 	"Converts TMS tile coordinates to Microsoft QuadTree"
 	quadKey = ""
-	print bin(tx), bin(ty)
+	#print bin(tx), bin(ty)
 	for i in range(level, 0, -1):
 		digit = 0
 		mask = 1 << (i-1)
-		print tx, ty, mask
+		#print tx, ty, mask
 		if (tx & mask) != 0:
 			digit += 1
 		if (ty & mask) != 0:
 			digit += 2
-		print quadKey
+		#print quadKey
 		quadKey += str(digit)
 	return quadKey
 
 
     
-################## own code
+################## the following functions are no longer from the copyrighted project
+
 import math
 import sys
 import urllib, cStringIO
-from PIL import Image
 
 def latBoundsCheck(latvalue):
 	latRange = [-85.05112878, 85.05112878]
@@ -146,16 +99,21 @@ def centers(lat, lon, lat1, lon1):
 
 	return final_lat, final_lon
 
-    
-lat = 42.057000
-lon = -87.674883
-lat1 = 42.058500
-lon1 = -87.676883
-level = 15
 
-# lat = 49.45
-# lon = 11.08
-# level = 10
+# Tech Lat Lon Points    
+# lat = 43.050824
+# lon = -88.682956
+# lat1 = 41.050824
+# lon1 = -86.682956
+
+
+
+lat = float(sys.argv[1])
+lon = float(sys.argv[2])
+lat1 = float(sys.argv[3])
+lon1 = float(sys.argv[4])
+level = 18
+
 center_lat, center_lon = centers(lat, lon, lat1, lon1)
 pix_x, pix_y = LatLonToPixels(center_lat, center_lon, level)
 #test1, test2, = LatLonToPixels(lat, lon, level)
@@ -167,9 +125,3 @@ urllib.urlretrieve(URL, "tile.jpg")
 
 sys.exit()
 
-#center_lat, center_lon = centers(lat, lon, lat1, lon1)
-#pix_x, pix_y = LatLonToPixels(center_lat, center_lon, level)
-# tile_x, tile_y = PixelsToTile(pix_x, pix_y)
-# #top_x, top_y, bottom_x, bottom_y = TileBounds(tile_x, tile_y, level)
-# quadkey = QuadTree(tile_x, tile_y, level)
-# print quadkey
