@@ -32,7 +32,7 @@
 
 ##the following function was taken from the above open source code
 
-def QuadTree(tx, ty, zoom ):
+def QuadTree(tx, ty, level):
 	"Converts TMS tile coordinates to Microsoft QuadTree"
 	quadKey = ""
 	#print bin(tx), bin(ty)
@@ -48,7 +48,6 @@ def QuadTree(tx, ty, zoom ):
 		quadKey += str(digit)
 	return quadKey
 
-
     
 ################## the following functions are no longer from the copyrighted project
 
@@ -56,10 +55,12 @@ import math
 import sys
 import urllib, cStringIO
 
+#ensure latitude is in range of globe
 def latBoundsCheck(latvalue):
 	latRange = [-85.05112878, 85.05112878]
 	return min(max(latvalue, latRange[0]), latRange[1])
 
+#ensure longitude is in range of globe
 def lonBoundsCheck(lonvalue):
 	lonRange = [-180, 180]
 	return min(max(lonvalue, lonRange[0]), lonRange[1])
@@ -100,12 +101,11 @@ def centers(lat, lon, lat1, lon1):
 	return final_lat, final_lon
 
 
-# Tech Lat Lon Points    
+#  Lat Lon Points    
 # lat = 43.050824
 # lon = -88.682956
 # lat1 = 41.050824
 # lon1 = -86.682956
-
 
 
 lat = float(sys.argv[1])

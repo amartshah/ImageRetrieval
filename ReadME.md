@@ -2,7 +2,7 @@
 EECS 395 Assignment 3
 
 ##Run 
-
+The following is a test case for the points that correspond to where Sheridan Road splits off into Sheridan and Chicago. (Alice Millard Chapel/Weber Arch)
 How to Run
 
     python script.py 43.051268 -88.676926 41.051268 -86.676926
