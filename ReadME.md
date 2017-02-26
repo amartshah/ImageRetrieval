@@ -1,4 +1,4 @@
-# MapMatching
+# Image Retrieval
 EECS 395 Assignment 3
 
 ##Run 
@@ -16,5 +16,6 @@ In Terminal, the program will print the following:<br />
 
 ##Resources
 We referenced the following resources:
+Bing Maps Tile System: https://msdn.microsoft.com/en-us/library/bb259689.aspx
 Global Map Tiles Classes by Petr Pridal. Web: http://www.klokan.cz/projects/gdal2tiles/
 
