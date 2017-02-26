@@ -88,7 +88,7 @@ def PixelsToTile(px, py):
 	ty = int(math.floor(py / 256.0))
 	return tx, ty
 
-#Calucalte the center of inputted points
+#Calculate the center of inputted points
 def centers(lat, lon, lat1, lon1):
 	"Compute the centers"
 	lat = float(lat)
@@ -100,28 +100,32 @@ def centers(lat, lon, lat1, lon1):
 
 	return final_lat, final_lon
 
-
+##hardcoded for testing - should return tech
 #  Lat Lon Points    
 # lat = 43.050824
 # lon = -88.682956
 # lat1 = 41.050824
 # lon1 = -86.682956
 
-
+#grabs both coordinates from command line input
 lat = float(sys.argv[1])
 lon = float(sys.argv[2])
 lat1 = float(sys.argv[3])
 lon1 = float(sys.argv[4])
 level = 18
 
+#calculates center of bounding box
 center_lat, center_lon = centers(lat, lon, lat1, lon1)
+#converts to pixels
 pix_x, pix_y = LatLonToPixels(center_lat, center_lon, level)
-#test1, test2, = LatLonToPixels(lat, lon, level)
+#converts to tile coords
 tile_x, tile_y = PixelsToTile(pix_x, pix_y)
+#query quadkey corresponding tile coords
 quadkey = QuadTree(tile_x, tile_y, level)
-print quadkey
-URL = "http://h0.ortho.tiles.virtualearth.net/tiles/h" + quadkey + ".jpeg?g=131"
-urllib.urlretrieve(URL, "tile.jpg")
+print "Quadkey: " + str(quadkey)
 
-sys.exit()
+#url for specific quadkey
+URL = "http://h0.ortho.tiles.virtualearth.net/tiles/h" + quadkey + ".jpeg?g=131"
+#save image for quadkey
+urllib.urlretrieve(URL, "tile.jpg")
 
