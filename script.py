@@ -82,16 +82,20 @@ Class is available under the open-source GDAL license (www.gdal.org).
 def QuadTree(tx, ty, zoom ):
 	"Converts TMS tile coordinates to Microsoft QuadTree"
 	quadKey = ""
-	print tx, ty
+	print bin(tx), bin(ty)
 	for i in range(level, 0, -1):
 		digit = 0
 		mask = 1 << (i-1)
+		print tx, ty, mask
 		if (tx & mask) != 0:
 			digit += 1
 		if (ty & mask) != 0:
 			digit += 2
+		print quadKey
 		quadKey += str(digit)
 	return quadKey
+
+
     
 ################## own code
 import math
@@ -99,13 +103,30 @@ import sys
 import urllib, cStringIO
 from PIL import Image
 
+def latBoundsCheck(latvalue):
+	latRange = [-85.05112878, 85.05112878]
+	return min(max(latvalue, latRange[0]), latRange[1])
+
+def lonBoundsCheck(lonvalue):
+	lonRange = [-180, 180]
+	return min(max(lonvalue, lonRange[0]), lonRange[1])
+
+def boundsCheck(value, min_check, max_check):
+	return min(max(value, min_check), max_check)
+
 
 def LatLonToPixels(lat, lon, level):
 	"Converts lat/lon to pixel coordinates in given zoom of the EPSG:4326 pyramid"
+	lat = latBoundsCheck(lat)
+	lon = lonBoundsCheck(lon)
 	sinlatitude = math.sin(lat * math.pi / 180)
-	px = ((180 + lon) / 360) * 256 * 2**level
-	py = (0.5 - math.log(1+sinlatitude)/(1-sinlatitude) / (4*math.pi)) * 256 * 2**level
-	return px, py
+	px = ((180 + lon) / 360) 
+	py = 0.5 - math.log((1+sinlatitude)/(1-sinlatitude)) / (4*math.pi)
+	map_scale = 256 * 2**level
+	px_final = boundsCheck(px * map_scale + 0.5, 0, map_scale - 1)
+	py_final = boundsCheck(py * map_scale + 0.5, 0, map_scale - 1)
+	return px_final, py_final
+
 
 def PixelsToTile(px, py):
 	"Returns coordinates of the tile covering region in pixel coordinates"
@@ -126,17 +147,19 @@ def centers(lat, lon, lat1, lon1):
 	return final_lat, final_lon
 
     
-# lat = 42.057000
-# lon = -87.674883
-# lat1 = 42.058500
-# lon1 = -87.676883
-# level = 18
+lat = 42.057000
+lon = -87.674883
+lat1 = 42.058500
+lon1 = -87.676883
+level = 15
 
-lat = 49.45
-lon = -11.08
-level = 1
-test1, test2, = LatLonToPixels(lat, lon, level)
-tile_x, tile_y = PixelsToTile(test1, test2)
+# lat = 49.45
+# lon = 11.08
+# level = 10
+center_lat, center_lon = centers(lat, lon, lat1, lon1)
+pix_x, pix_y = LatLonToPixels(center_lat, center_lon, level)
+#test1, test2, = LatLonToPixels(lat, lon, level)
+tile_x, tile_y = PixelsToTile(pix_x, pix_y)
 quadkey = QuadTree(tile_x, tile_y, level)
 print quadkey
 URL = "http://h0.ortho.tiles.virtualearth.net/tiles/h" + quadkey + ".jpeg?g=131"
@@ -144,8 +167,8 @@ urllib.urlretrieve(URL, "tile.jpg")
 
 sys.exit()
 
-# center_lat, center_lon = centers(lat, lon, lat1, lon1)
-# pix_x, pix_y = LatLonToPixels(center_lat, center_lon, level)
+#center_lat, center_lon = centers(lat, lon, lat1, lon1)
+#pix_x, pix_y = LatLonToPixels(center_lat, center_lon, level)
 # tile_x, tile_y = PixelsToTile(pix_x, pix_y)
 # #top_x, top_y, bottom_x, bottom_y = TileBounds(tile_x, tile_y, level)
 # quadkey = QuadTree(tile_x, tile_y, level)
