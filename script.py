@@ -68,7 +68,7 @@ def lonBoundsCheck(lonvalue):
 def boundsCheck(value, min_check, max_check):
 	return min(max(value, min_check), max_check)
 
-
+#Convert Lat and Lon to pixels
 def LatLonToPixels(lat, lon, level):
 	"Converts lat/lon to pixel coordinates in given zoom of the EPSG:4326 pyramid"
 	lat = latBoundsCheck(lat)
@@ -81,14 +81,14 @@ def LatLonToPixels(lat, lon, level):
 	py_final = boundsCheck(py * map_scale + 0.5, 0, map_scale - 1)
 	return px_final, py_final
 
-
+#Convert Pixels to Tile Coordinates
 def PixelsToTile(px, py):
 	"Returns coordinates of the tile covering region in pixel coordinates"
-
 	tx = int(math.floor(px / 256.0))
 	ty = int(math.floor(py / 256.0))
 	return tx, ty
 
+#Calucalte the center of inputted points
 def centers(lat, lon, lat1, lon1):
 	"Compute the centers"
 	lat = float(lat)
