@@ -48,6 +48,7 @@ def QuadTree(tx, ty, level):
 		quadKey += str(digit)
 	return quadKey
 
+
     
 ################## the following functions are no longer from the copyrighted project
 
@@ -100,32 +101,37 @@ def centers(lat, lon, lat1, lon1):
 
 	return final_lat, final_lon
 
-##hardcoded for testing - should return tech
-#  Lat Lon Points    
-# lat = 43.050824
-# lon = -88.682956
-# lat1 = 41.050824
-# lon1 = -86.682956
-
 #grabs both coordinates from command line input
 lat = float(sys.argv[1])
 lon = float(sys.argv[2])
 lat1 = float(sys.argv[3])
 lon1 = float(sys.argv[4])
-level = 18
+
+def BingImageRetriever(center_lat, center_lon, level):
+	#converts to pixels
+	pix_x, pix_y = LatLonToPixels(center_lat, center_lon, level)
+	#converts to tile coords
+	tile_x, tile_y = PixelsToTile(pix_x, pix_y)
+	#query quadkey corresponding tile coords
+	quadkey = QuadTree(tile_x, tile_y, level)
+	#url for specific quadkey
+	URL = "http://h0.ortho.tiles.virtualearth.net/tiles/h" + quadkey + ".jpeg?g=131"
+	urllib.urlretrieve(URL, "tile.jpg")
+	return URL, quadkey
 
 #calculates center of bounding box
 center_lat, center_lon = centers(lat, lon, lat1, lon1)
-#converts to pixels
-pix_x, pix_y = LatLonToPixels(center_lat, center_lon, level)
-#converts to tile coords
-tile_x, tile_y = PixelsToTile(pix_x, pix_y)
-#query quadkey corresponding tile coords
-quadkey = QuadTree(tile_x, tile_y, level)
-print "Quadkey: " + str(quadkey)
 
-#url for specific quadkey
-URL = "http://h0.ortho.tiles.virtualearth.net/tiles/h" + quadkey + ".jpeg?g=131"
+#stops at the first level that returns non-error image
+for level in xrange(23, 0, -1):
+	URL, final_quadkey = BingImageRetriever(center_lat, center_lon, level)
+	if open("error.jpg","rb").read() == open("tile.jpg","rb").read():
+		pass
+	else:
+		print "Quadkey: " + str(final_quadkey)
+		break
+	
+
+
 #save image for quadkey
-urllib.urlretrieve(URL, "tile.jpg")
 
