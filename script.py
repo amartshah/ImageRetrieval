@@ -131,7 +131,3 @@ for level in xrange(23, 0, -1):
 		print "Quadkey: " + str(final_quadkey)
 		break
 	
-
-
-#save image for quadkey
-
